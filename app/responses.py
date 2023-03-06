@@ -1,7 +1,11 @@
-from api.db import get_sector_data
-from api.db import get_dip_array
-from enum import Enum
 import json
+from enum import Enum
+from functools import lru_cache
+
+from sqlalchemy.orm import Session
+
+from app.crud import get_dip_array, get_sector_data
+
 
 class Surveillance(Enum):
     SURV3_LOOT3 = 4
@@ -11,20 +15,24 @@ class Surveillance(Enum):
     SURV2_LOOT1 = 8
     SURV1_LOOT1 = 9
 
+
 class Favor(Enum):
     DOUBLE_DIP = 18
     FAILED_DIP = 19
     CANT_DIP = 20
+
 
 class Tier(Enum):
     TIER3 = 3
     TIER2 = 2
     TIER1 = 1
 
+
 class Retrieval(Enum):
     TIER3 = 14
     TIER2 = 15
     TIER1 = 16
+
 
 def get_loot_tier(s: int):
     if s == 4:
@@ -34,19 +42,22 @@ def get_loot_tier(s: int):
     else:
         return Tier.TIER1
 
+
+@lru_cache()
 def load_itemlist():
-    with open('./api/data/items.json', 'r', errors='ignore') as file:
+    with open('./app/data/items.json', 'r', errors='ignore') as file:
         json_data = file.read()
     return json.loads(json_data)
 
-def get_sector_data_response(sector_id: int):
 
-    sector_rows = get_sector_data(sector_id)
+def get_sector_data_response(db: Session, sector_id: int):
 
-    dip_rows = get_dip_array([
+    sector_rows = get_sector_data(db, sector_id)
+
+    dip_rows = get_dip_array(db, [
         sector.dip_1 for sector in sector_rows] + [
         sector.dip_2 for sector in sector_rows if sector.dip_2 is not None
-        ])
+    ])
     
     double_dips = [
         sum(1 for sector in sector_rows if sector.favor_result == 19),
