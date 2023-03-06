@@ -1,12 +1,11 @@
-from typing import List
 from typing import Optional
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
 
-class Base(DeclarativeBase):
-    pass
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped
+
+from app.database import Base
+
 
 class SectorData(Base):
     __tablename__ = "sector_data"
@@ -28,6 +27,7 @@ class SectorData(Base):
     dip_2: Mapped[Optional[int]] = mapped_column(ForeignKey("dip_data.id"))
     def __repr__(self) -> str:
         return ""
+
 
 class DipData(Base):
     __tablename__ = "dip_data"
